@@ -11,7 +11,7 @@ impl FloatCore for f32 {}
 
 enum ComplexComponent {
   Re,
-  Im,
+  _Im,
 }
 
 enum PeakCorrection {
@@ -34,7 +34,7 @@ where
     sample_rate: usize,
     power_threshold: T,
     clarity_threshold: T,
-    history: Option<History>,
+    history: Option<PitchDetectorHistory>,
   ) -> Option<Pitch<T>>;
 }
 
@@ -47,7 +47,7 @@ where
 }
 
 #[derive(Copy, Clone)]
-pub struct History {
+pub struct PitchDetectorHistory {
   pub previous_peak: usize,
 }
 
@@ -115,7 +115,7 @@ where
     sample_rate: usize,
     power_threshold: T,
     clarity_threshold: T,
-    _: Option<History>,
+    _: Option<PitchDetectorHistory>,
   ) -> Option<Pitch<T>> {
     assert_eq!(signal.len(), self.internals.size);
 
@@ -167,7 +167,7 @@ where
     sample_rate: usize,
     power_threshold: T,
     clarity_threshold: T,
-    _: Option<History>,
+    _: Option<PitchDetectorHistory>,
   ) -> Option<Pitch<T>> {
     assert_eq!(signal.len(), self.internals.size);
 
@@ -219,7 +219,7 @@ where
     sample_rate: usize,
     power_threshold: T,
     clarity_threshold: T,
-    history: Option<History>,
+    history: Option<PitchDetectorHistory>,
   ) -> Option<Pitch<T>> {
     assert_eq!(signal.len(), self.internals.size);
 
@@ -249,7 +249,7 @@ fn pitch_from_peaks<T>(
   sample_rate: usize,
   clarity_threshold: T,
   correction: PeakCorrection,
-  history: Option<History>,
+  history: Option<PitchDetectorHistory>,
 ) -> Option<Pitch<T>>
 where
   T: FloatCore,
@@ -420,7 +420,7 @@ fn distance_between_peaks(a: usize, b: usize) -> usize {
 fn choose_peak_with_history<T: FloatCore>(
   peaks: &[(usize, T)],
   threshold: T,
-  history: History,
+  history: PitchDetectorHistory,
 ) -> Option<(usize, T)> {
   let mut closest_peak: Option<(usize, T)> = None;
   for &peak in peaks {
@@ -504,7 +504,7 @@ fn copy_real_to_complex<T: FloatCore>(
         output[i].im = T::zero();
       }
     }
-    ComplexComponent::Im => {
+    ComplexComponent::_Im => {
       for i in 0..input.len() {
         output[i].im = input[i];
         output[i].re = T::zero();
@@ -529,7 +529,7 @@ fn copy_complex_to_real<T: FloatCore>(
         output[i] = input[i].re
       }
     }
-    ComplexComponent::Im => {
+    ComplexComponent::_Im => {
       for i in 0..input.len() {
         output[i] = input[i].im
       }
